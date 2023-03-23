@@ -4,6 +4,7 @@ import { ICurrentUser } from '../types/currentUser.interface';
 import { HttpClient } from '@angular/common/http';
 import { enviroment } from 'src/environments/environment';
 import { IRegisterRequest } from '../types/registerRequest.interface';
+import { ILoginRequest } from '../types/loginRequest.interface';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +21,11 @@ export class AuthService {
   register(registerRequestBody: IRegisterRequest): Observable<ICurrentUser> {
     const url = enviroment.apiUrl + '/users';
     return this.http.post<ICurrentUser>(url, registerRequestBody);
+  }
+
+  login(RequestBody: ILoginRequest): Observable<ICurrentUser> {
+    const url = enviroment.apiUrl + '/users/login';
+    return this.http.post<ICurrentUser>(url, RequestBody);
   }
 
   setToken(token: string): void {

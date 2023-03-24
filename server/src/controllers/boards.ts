@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import { Server, Socket } from 'socket.io';
 import BoardModel from '../models/board';
 import { ExpressRequestInterface } from '../types/expressRequest.interface';
 
@@ -24,12 +25,10 @@ export const getBoard = async (
   next: NextFunction
 ) => {
   try {
-    console.log('trying');
     if (!req.user) {
       return res.sendStatus(401);
     }
-    console.log(req.params.id);
-    const board = await BoardModel.findById(req.params.id);
+    const board = await BoardModel.findById(req.params.boardId);
     res.send(board);
   } catch (error) {
     next(error);
@@ -55,6 +54,26 @@ export const createBoard = async (
   } catch (error) {
     next(error);
   }
+};
+
+export const joinBoard = (
+  io: Server,
+  socket: Socket,
+  data: { boardId: string }
+) => {
+  // adds this user (identified from the socket object) to the room with id = data.boardId
+  console.log('server socket io join', data.boardId);
+  socket.join(data.boardId);
+};
+
+export const leaveBoard = (
+  io: Server,
+  socket: Socket,
+  data: { boardId: string }
+) => {
+  // removes this user (identified from the socket object) to the room with id = data.boardId
+  console.log('server socket io leave', data.boardId);
+  socket.leave(data.boardId);
 };
 
 // db.boards.insert({title: "First Board", userId: ObjectId("641c3d993dbf12ebea1b8a0d")})

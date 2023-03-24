@@ -8,6 +8,7 @@ import { IBoard } from '../types/board.interface';
   providedIn: 'root'
 })
 export class BoardsService {
+
   constructor(private http: HttpClient) {}
   getBoards(): Observable<IBoard[]> {
     const url = enviroment.apiUrl + '/boards';

@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { enviroment } from 'src/environments/environment';
 import { IRegisterRequest } from '../types/registerRequest.interface';
 import { ILoginRequest } from '../types/loginRequest.interface';
+import { SocketService } from 'src/app/shared/services/socket.service';
 
 @Injectable()
 export class AuthService {
@@ -16,7 +17,7 @@ export class AuthService {
     filter((currentUser) => currentUser !== undefined),
     map(Boolean)
   );
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private socketService: SocketService) {}
   getCurrentUser(): Observable<ICurrentUser> {
     const url = enviroment.apiUrl + '/user';
     console.log(url);
@@ -33,9 +34,10 @@ export class AuthService {
     return this.http.post<ICurrentUser>(url, RequestBody);
   }
 
-  logout(): void{
+  logout(): void {
     localStorage.removeItem('token');
     this.currentUser$.next(null);
+    this.socketService.disconnect();
   }
 
   setToken(token: string): void {

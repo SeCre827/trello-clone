@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { SocketService } from 'src/app/shared/services/socket.service';
 import { AuthService } from '../../services/auth.service';
 import { ILoginRequest } from '../../types/loginRequest.interface';
 
@@ -16,7 +17,12 @@ export class LoginComponent {
     password: ['', Validators.required]
   });
 
-  constructor(private fb: FormBuilder, private authService: AuthService, private router: Router) {}
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router,
+    private socketService: SocketService
+  ) {}
 
   onSubmit(): void {
     this.authService.login(this.form.value as ILoginRequest).subscribe({
@@ -24,12 +30,13 @@ export class LoginComponent {
         console.log('currentUser', currentUser);
         this.authService.setToken(currentUser.token);
         this.authService.setCurrentUser(currentUser);
-        this.errorMessage =null;
-        this.router.navigateByUrl('/')
+        this.socketService.setupSocketConnection(currentUser)
+        this.errorMessage = null;
+        this.router.navigateByUrl('/');
       },
       error: (err: HttpErrorResponse) => {
         console.log('err', err);
-        this.errorMessage = err.error.emailOrPassword
+        this.errorMessage = err.error.emailOrPassword;
       }
     });
     console.log('onSubmit', this.form.value);

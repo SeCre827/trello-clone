@@ -2,12 +2,16 @@ const mongoose = require('mongoose');
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import jwt from 'jsonwebtoken';
 import * as usersController from './controllers/users';
 import * as boardsController from './controllers/boards';
 import bodyParser from 'body-parser';
 import authMiddleware from './middlewares/auth';
 import cors from 'cors';
 import { SocketEventEnum } from './types/socketEvents.enum';
+import { secret } from './config';
+import User from './models/user';
+import { SocketExtended } from './types/socket.interface';
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
@@ -38,7 +42,21 @@ app.get('/api/boards', authMiddleware, boardsController.getBoards);
 app.post('/api/boards', authMiddleware, boardsController.createBoard);
 app.get('/api/boards/:boardId', authMiddleware, boardsController.getBoard);
 
-io.on('connection', (socket) => {
+io.use(async (socket: SocketExtended, next) => {
+  try {
+    const token = (socket.handshake.auth.token as string) ?? '';
+    const data = jwt.verify(token.split(' ')[1], secret) as {
+      id: string;
+      email: string;
+    };
+    const user = await User.findById(data.id);
+
+    if (!user) return next(new Error('Authentication Error'));
+    socket.user = user;
+  } catch (err) {
+    next(new Error('Authentication Error'));
+  }
+}).on('connection', (socket) => {
   socket.on(SocketEventEnum.boardsJoin, (data) => {
     boardsController.joinBoard(io, socket, data);
   });

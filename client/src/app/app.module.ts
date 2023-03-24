@@ -7,6 +7,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AuthModule } from './auth/auth.module';
 import { AuthInterceptor } from './auth/services/authinterceptor.service';
+import { BoardModule } from './board/board.module';
 import { BoardsModule } from './boards/boards.module';
 import { HomeModule } from './home/home.module';
 
@@ -18,7 +19,8 @@ import { HomeModule } from './home/home.module';
     AuthModule,
     HttpClientModule,
     HomeModule,
-    BoardsModule
+    BoardsModule,
+    BoardModule
   ],
   providers: [
     {

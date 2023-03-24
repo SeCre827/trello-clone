@@ -14,6 +14,11 @@ export class BoardsService {
     return this.http.get<IBoard[]>(url);
   }
 
+  getBoard(boardId: string): Observable<IBoard> {
+    const url = `${enviroment.apiUrl}/boards/${boardId}`;
+    return this.http.get<IBoard>(url);
+  }
+
   createBoard(title: string): Observable<IBoard> {
     const url = enviroment.apiUrl + '/boards';
     return this.http.post<IBoard>(url, { title });

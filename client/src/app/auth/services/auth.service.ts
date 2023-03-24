@@ -33,6 +33,11 @@ export class AuthService {
     return this.http.post<ICurrentUser>(url, RequestBody);
   }
 
+  logout(): void{
+    localStorage.removeItem('token');
+    this.currentUser$.next(null);
+  }
+
   setToken(token: string): void {
     localStorage.setItem('token', token);
   }

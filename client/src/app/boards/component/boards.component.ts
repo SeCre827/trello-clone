@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { BoardsService } from 'src/app/shared/services/boards.service';
-import { IBoard } from '../shared/types/board.interface';
+import { IBoard } from 'src/app/shared/types/board.interface';
 
 @Component({
   selector: 'boards',

@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
-import { InlineFormButtonInputType } from '../../types/InlineFormButtonInputType.enum';
+import { InlineFormButtonInputType } from 'src/app/shared/types/InlineFormButtonInputType.enum';
 
 @Component({
   selector: 'inline-form',
@@ -17,7 +17,7 @@ export class InlineFormComponent {
 
   isEditing: boolean = false;
   form = this.fb.group({
-  title: ['']
+    title: ['']
   });
 
   constructor(private fb: FormBuilder) {}

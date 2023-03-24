@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { InlineFormComponent } from './inline-form.component';
+import { InlineFormComponent } from './components/inline-form.component';
 import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({

@@ -6,6 +6,12 @@
       <div class="column-title">
         {{ column.title }}
       </div>
+      <div
+        *ngFor="let task of getTasksByColumn(column.id, data.tasks)"
+        class="task"
+      >
+        {{ task.title }}
+      </div>
     </div>
     <inline-form
       class="create-column-form"

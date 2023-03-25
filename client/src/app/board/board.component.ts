@@ -1,13 +1,22 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
-import { combineLatest, filter, map, Observable, Subscription } from 'rxjs';
+import {
+  combineLatest,
+  filter,
+  map,
+  Observable,
+  Subscription,
+  tap
+} from 'rxjs';
 import { BoardsService } from '../shared/services/boards.service';
 import { ColumnService } from '../shared/services/columns.service';
 import { SocketService } from '../shared/services/socket.service';
+import { TaskService } from '../shared/services/tasks.service';
 import { IBoard } from '../shared/types/board.interface';
 import { IColumn } from '../shared/types/column.interface';
 import { IColumnRequest } from '../shared/types/columnRequest.interface';
 import { SocketEventEnum } from '../shared/types/socketEvents.enum';
+import { ITask } from '../shared/types/task.interface';
 import { BoardStateService } from './services/board-state.service';
 
 @Component({
@@ -20,6 +29,7 @@ export class BoardComponent implements OnInit, OnDestroy {
   data$: Observable<{
     board: IBoard;
     columns: IColumn[];
+    tasks: ITask[];
   }>;
   constructor(
     private boardsService: BoardsService,
@@ -27,7 +37,8 @@ export class BoardComponent implements OnInit, OnDestroy {
     private router: Router,
     private boardStateService: BoardStateService,
     private SocketService: SocketService,
-    private columnService: ColumnService
+    private columnService: ColumnService,
+    private taskService: TaskService
   ) {
     const boardId = this.route.snapshot.paramMap.get('boardId');
     if (!boardId) {
@@ -37,12 +48,15 @@ export class BoardComponent implements OnInit, OnDestroy {
 
     this.data$ = combineLatest([
       this.boardStateService.board$.pipe(filter(Boolean)),
-      this.boardStateService.columns$
+      this.boardStateService.columns$,
+      this.boardStateService.tasks$
     ]).pipe(
-      map(([board, columns]) => ({
+      map(([board, columns, tasks]) => ({
         board,
-        columns
-      }))
+        columns,
+        tasks
+      })),
+      tap((data) => console.log(data))
     );
   }
 
@@ -69,9 +83,12 @@ export class BoardComponent implements OnInit, OnDestroy {
   private fetchData(): void {
     this.boardsService.getBoard(this.boardId).subscribe((board) => {
       this.boardStateService.setBoard(board);
-      this.columnService.getColumns(this.boardId).subscribe((columns) => {
-        this.boardStateService.setColumns(columns);
-      });
+    });
+    this.columnService.getColumns(this.boardId).subscribe((columns) => {
+      this.boardStateService.setColumns(columns);
+    });
+    this.taskService.getTasks(this.boardId).subscribe((tasks) => {
+      this.boardStateService.setTasks(tasks);
     });
   }
 
@@ -89,6 +106,10 @@ export class BoardComponent implements OnInit, OnDestroy {
     };
     this.columnService.createColumn(columInput);
     console.log('create column: ', title);
+  }
+
+  getTasksByColumn(columnId: string, tasks: ITask[]): ITask[] {
+    return tasks.filter((task) => task.columnId === columnId);
   }
 
   ngOnDestroy(): void {

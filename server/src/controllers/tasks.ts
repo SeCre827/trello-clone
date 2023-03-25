@@ -2,12 +2,12 @@ import { NextFunction, Response } from 'express';
 import { ExpressRequestInterface } from '../types/expressRequest.interface';
 import { Server } from 'socket.io';
 
-import ColumnModel from '../models/column';
+import TaskModel from '../models/task';
 import { SocketExtended } from '../types/socket.interface';
 import { SocketEventEnum } from '../types/socketEvents.enum';
 import { getErrorMessage } from '../helpers';
 
-export const getColumns = async (
+export const getTasks = async (
   req: ExpressRequestInterface,
   res: Response,
   next: NextFunction
@@ -16,16 +16,16 @@ export const getColumns = async (
     if (!req.user) {
       return res.sendStatus(401);
     }
-    const columns = await ColumnModel.find({
+    const tasks = await TaskModel.find({
       boardId: req.params.boardId
     });
-    res.send(columns);
+    res.send(tasks);
   } catch (error) {
     next(error);
   }
 };
 
-export const getColumn = async (
+export const getTask = async (
   req: ExpressRequestInterface,
   res: Response,
   next: NextFunction
@@ -34,37 +34,39 @@ export const getColumn = async (
     if (!req.user) {
       return res.sendStatus(401);
     }
-    const column = await ColumnModel.findById(req.params.columnId);
-    res.send(column);
+    const task = await TaskModel.findById(req.params.taskId);
+    res.send(task);
   } catch (error) {
     next(error);
   }
 };
 
-export const createColumn = async (
+export const createTask = async (
   io: Server,
   socket: SocketExtended,
-  data: { boardId: string; title: string }
+  data: {
+    boardId: string;
+    title: string;
+    description: string;
+  }
 ) => {
   try {
     if (!socket.user) {
-      socket.emit(
-        SocketEventEnum.columnCreateFailure,
-        'User is not authorized'
-      );
+      socket.emit(SocketEventEnum.taskCreateFailure, 'User is not authorized');
       return;
     }
-    const newColumn = new ColumnModel({
+    const newTask = new TaskModel({
       title: data.title,
       boardId: data.boardId,
-      userId: socket.user.id
+      userId: socket.user.id,
+      description: data.description,
     });
-    const savedColumn = await newColumn.save();
-    io.to(data.boardId).emit(SocketEventEnum.columnCreateSucess, savedColumn);
-    console.log('savedColumn: ', savedColumn);
+    const savedTask = await newTask.save();
+    io.to(data.boardId).emit(SocketEventEnum.taskCreateSucess, savedTask);
+    console.log('savedTask: ', savedTask);
   } catch (err) {
     socket.emit(SocketEventEnum.columnCreateFailure, getErrorMessage(err));
   }
 };
 
-// db.columns.insert({title: "First Column", userId: ObjectId("641c3d993dbf12ebea1b8a0d"), boardId: ObjectId("641cee3219a42d1e454ee1de")})
+// db.tasks.insert({title: "First Task",description: 'The best Task', userId: ObjectId("641c3d993dbf12ebea1b8a0d"), boardId: ObjectId("641cee3219a42d1e454ee1de"), columnId: ObjectId("641ed020dd29d12b550fbd05")})

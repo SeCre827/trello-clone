@@ -29,6 +29,11 @@ export class InlineFormComponent {
     this.isEditing = true;
   }
 
+  onCancel(e: Event): void {
+    e.stopPropagation();
+    this.isEditing = false;
+  }
+
   onSubmit(): void {
     if (this.form.value.title) {
       this.handleSubmit.emit(this.form.value.title);

@@ -32,5 +32,13 @@
     >
       {{ buttonText }}
     </button>
+
+    <button
+      *ngIf="hasButton"
+      class="inline-form-button-cancel"
+      (click)="onCancel($event)"
+    >
+      cancel
+    </button>
   </form>
 </div>

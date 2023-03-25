@@ -20,7 +20,6 @@ export class AuthService {
   constructor(private http: HttpClient, private socketService: SocketService) {}
   getCurrentUser(): Observable<ICurrentUser> {
     const url = enviroment.apiUrl + '/user';
-    console.log(url);
     return this.http.get<ICurrentUser>(url);
   }
 

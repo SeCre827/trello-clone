@@ -8,7 +8,7 @@ import { SocketEventEnum } from 'src/app/shared/types/socketEvents.enum';
 @Injectable({
   providedIn: 'root'
 })
-export class BoardService {
+export class BoardStateService {
   constructor(private socketService: SocketService) {}
 
   board$ = new BehaviorSubject<IBoard | null>(null);
@@ -23,5 +23,10 @@ export class BoardService {
   leaveBoard(boardId: string): void {
     this.board$.next(null);
     this.socketService.emit(SocketEventEnum.boardsLeave, { boardId });
+  }
+
+  addColumn(column: IColumn): void {
+    let updatedColumns: IColumn[] = [...this.columns$.getValue(), column];
+    this.setColumns(updatedColumns);
   }
 }

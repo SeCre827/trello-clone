@@ -7,6 +7,13 @@
         {{ column.title }}
       </div>
     </div>
-    INLINE form for creating a column
+    <inline-form
+      class="create-column-form"
+      defaultText="Add a list"
+      [hasButton]="true"
+      buttonText="Add list"
+      inputPlaceholder="Add column name"
+      (handleSubmit)="createColumn($event)"
+    ></inline-form>
   </div>
 </div>

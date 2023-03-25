@@ -39,6 +39,5 @@ export class LoginComponent {
         this.errorMessage = err.error.emailOrPassword;
       }
     });
-    console.log('onSubmit', this.form.value);
   }
 }

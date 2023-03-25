@@ -6,8 +6,9 @@ import { ColumnService } from '../shared/services/columns.service';
 import { SocketService } from '../shared/services/socket.service';
 import { IBoard } from '../shared/types/board.interface';
 import { IColumn } from '../shared/types/column.interface';
+import { IColumnRequest } from '../shared/types/columnRequest.interface';
 import { SocketEventEnum } from '../shared/types/socketEvents.enum';
-import { BoardService } from './services/board.service';
+import { BoardStateService } from './services/board-state.service';
 
 @Component({
   selector: 'app-board',
@@ -24,7 +25,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     private boardsService: BoardsService,
     private route: ActivatedRoute,
     private router: Router,
-    private boardService: BoardService,
+    private boardStateService: BoardStateService,
     private SocketService: SocketService,
     private columnService: ColumnService
   ) {
@@ -35,8 +36,8 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.boardId = boardId;
 
     this.data$ = combineLatest([
-      this.boardService.board$.pipe(filter(Boolean)),
-      this.boardService.columns$
+      this.boardStateService.board$.pipe(filter(Boolean)),
+      this.boardStateService.columns$
     ]).pipe(
       map(([board, columns]) => ({
         board,
@@ -54,18 +55,22 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
   private initializeListeners() {
     this.routerSub = this.router.events.subscribe((event) => {
-      console.log(event);
       if (event instanceof NavigationStart) {
-        this.boardService.leaveBoard(this.boardId);
+        this.boardStateService.leaveBoard(this.boardId);
       }
+    });
+    this.SocketService.listen<IColumn>(
+      SocketEventEnum.columnCreateSucess
+    ).subscribe((column) => {
+      this.boardStateService.addColumn(column);
     });
   }
 
   private fetchData(): void {
     this.boardsService.getBoard(this.boardId).subscribe((board) => {
-      this.boardService.setBoard(board);
+      this.boardStateService.setBoard(board);
       this.columnService.getColumns(this.boardId).subscribe((columns) => {
-        this.boardService.setColumns(columns);
+        this.boardStateService.setColumns(columns);
       });
     });
   }
@@ -75,6 +80,15 @@ export class BoardComponent implements OnInit, OnDestroy {
       boardId: this.boardId,
       title: 'foo'
     });
+  }
+
+  createColumn(title: string) {
+    const columInput: IColumnRequest = {
+      title,
+      boardId: this.boardId
+    };
+    this.columnService.createColumn(columInput);
+    console.log('create column: ', title);
   }
 
   ngOnDestroy(): void {

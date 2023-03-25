@@ -13,7 +13,6 @@ export const getColumns = async (
   next: NextFunction
 ) => {
   try {
-    console.log('in middleware');
     if (!req.user) {
       return res.sendStatus(401);
     }

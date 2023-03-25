@@ -5,6 +5,7 @@ import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import * as usersController from './controllers/users';
 import * as boardsController from './controllers/boards';
+import * as columnsController from './controllers/columns';
 import bodyParser from 'body-parser';
 import authMiddleware from './middlewares/auth';
 import cors from 'cors';
@@ -41,18 +42,21 @@ app.get('/api/user', authMiddleware, usersController.currentUser);
 app.get('/api/boards', authMiddleware, boardsController.getBoards);
 app.post('/api/boards', authMiddleware, boardsController.createBoard);
 app.get('/api/boards/:boardId', authMiddleware, boardsController.getBoard);
+app.get('/api/boards/:boardId/columns', authMiddleware, columnsController.getColumns);
 
 io.use(async (socket: SocketExtended, next) => {
   try {
     const token = (socket.handshake.auth.token as string) ?? '';
-    const data = jwt.verify(token.split(' ')[1], secret) as {
+    const data = jwt.verify(token, secret) as {
       id: string;
       email: string;
     };
     const user = await User.findById(data.id);
-
-    if (!user) return next(new Error('Authentication Error'));
+    if (!user) {
+      return next(new Error('Authentication Error'));
+    }
     socket.user = user;
+    next();
   } catch (err) {
     next(new Error('Authentication Error'));
   }

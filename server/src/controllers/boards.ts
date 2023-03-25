@@ -1,7 +1,8 @@
-import { NextFunction, Request, Response } from 'express';
-import { Server, Socket } from 'socket.io';
+import { NextFunction, Response } from 'express';
+import { Server } from 'socket.io';
 import BoardModel from '../models/board';
 import { ExpressRequestInterface } from '../types/expressRequest.interface';
+import { SocketExtended } from '../types/socket.interface';
 
 export const getBoards = async (
   req: ExpressRequestInterface,
@@ -58,21 +59,21 @@ export const createBoard = async (
 
 export const joinBoard = (
   io: Server,
-  socket: Socket,
+  socket: SocketExtended,
   data: { boardId: string }
 ) => {
   // adds this user (identified from the socket object) to the room with id = data.boardId
-  console.log('server socket io join', data.boardId);
+  console.log('server socket io join', socket.user);
   socket.join(data.boardId);
 };
 
 export const leaveBoard = (
   io: Server,
-  socket: Socket,
+  socket: SocketExtended,
   data: { boardId: string }
 ) => {
   // removes this user (identified from the socket object) to the room with id = data.boardId
-  console.log('server socket io leave', data.boardId);
+  console.log('server socket io leave', socket.user);
   socket.leave(data.boardId);
 };
 

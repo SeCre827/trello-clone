@@ -67,6 +67,10 @@ io.use(async (socket: SocketExtended, next) => {
   socket.on(SocketEventEnum.boardsLeave, (data) => {
     boardsController.leaveBoard(io, socket, data);
   });
+  socket.on(SocketEventEnum.columnCreate, (data) => {
+    columnsController.createColumn(io, socket, data);
+  });
+
 });
 
 mongoose.connect('mongodb://localhost:27027/eltrello').then(() => {

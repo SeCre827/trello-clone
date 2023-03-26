@@ -34,4 +34,10 @@ export class BoardStateService {
     let updatedColumns: IColumn[] = [...this.columns$.getValue(), column];
     this.setColumns(updatedColumns);
   }
+
+  addTask(task: ITask): void {
+    let updatedTasks: ITask[] = [...this.tasks$.getValue(), task];
+    this.setTasks(updatedTasks);
+    console.log('updated tasks :', this.tasks$.getValue());
+  }
 }

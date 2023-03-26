@@ -17,6 +17,7 @@ import { IColumn } from '../shared/types/column.interface';
 import { IColumnRequest } from '../shared/types/columnRequest.interface';
 import { SocketEventEnum } from '../shared/types/socketEvents.enum';
 import { ITask } from '../shared/types/task.interface';
+import { ITaskRequest } from '../shared/types/taskRequest.interface';
 import { BoardStateService } from './services/board-state.service';
 
 @Component({
@@ -78,6 +79,12 @@ export class BoardComponent implements OnInit, OnDestroy {
     ).subscribe((column) => {
       this.boardStateService.addColumn(column);
     });
+
+    this.SocketService.listen<ITask>(
+      SocketEventEnum.taskCreateSucess
+    ).subscribe((task) => {
+      this.boardStateService.addTask(task);
+    });
   }
 
   private fetchData(): void {
@@ -106,6 +113,16 @@ export class BoardComponent implements OnInit, OnDestroy {
     };
     this.columnService.createColumn(columInput);
     console.log('create column: ', title);
+  }
+
+  createTask(title: string, columnId: string) {
+    const taskInput: ITaskRequest = {
+      title,
+      boardId: this.boardId,
+      columnId: columnId
+    };
+    this.taskService.createTask(taskInput);
+    console.log('create task: ', title);
   }
 
   getTasksByColumn(columnId: string, tasks: ITask[]): ITask[] {

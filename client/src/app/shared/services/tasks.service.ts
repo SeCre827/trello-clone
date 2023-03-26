@@ -17,5 +17,8 @@ export class TaskService {
     return this.http.get<ITask[]>(url);
   }
 
-
+  createTask(taskInput: ITaskRequest): void {
+    console.log('sent to socket', taskInput);
+    this.socketService.emit(SocketEventEnum.taskCreate, taskInput);
+  }
 }

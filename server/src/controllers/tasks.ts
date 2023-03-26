@@ -47,25 +47,29 @@ export const createTask = async (
   data: {
     boardId: string;
     title: string;
+    columnId: string;
     description: string;
   }
 ) => {
   try {
+    console.log('create task arrived', data);
     if (!socket.user) {
+      console.log('user untothorized');
       socket.emit(SocketEventEnum.taskCreateFailure, 'User is not authorized');
       return;
     }
     const newTask = new TaskModel({
       title: data.title,
       boardId: data.boardId,
+      columnId: data.columnId,
       userId: socket.user.id,
-      description: data.description,
+      description: data.description
     });
     const savedTask = await newTask.save();
     io.to(data.boardId).emit(SocketEventEnum.taskCreateSucess, savedTask);
-    console.log('savedTask: ', savedTask);
   } catch (err) {
     socket.emit(SocketEventEnum.columnCreateFailure, getErrorMessage(err));
+    console.log(err);
   }
 };
 

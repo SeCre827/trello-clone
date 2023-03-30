@@ -33,6 +33,7 @@ mongoose.set('toJSON', {
   }
 });
 
+//  REST API
 app.get('/', (req, res) => {
   res.send('API IS UP');
 });
@@ -60,6 +61,8 @@ app.get(
   tasksController.getTask
 );
 
+// Socket IO
+
 io.use(async (socket: SocketExtended, next) => {
   try {
     const token = (socket.handshake.auth.token as string) ?? '';
@@ -83,12 +86,30 @@ io.use(async (socket: SocketExtended, next) => {
   socket.on(SocketEventEnum.boardsLeave, (data) => {
     boardsController.leaveBoard(io, socket, data);
   });
-  socket.on(SocketEventEnum.columnCreate, (data) => {
+  socket.on(SocketEventEnum.columnsCreate, (data) => {
     columnsController.createColumn(io, socket, data);
   });
 
-  socket.on(SocketEventEnum.taskCreate, (data) => {
+  socket.on(SocketEventEnum.tasksCreate, (data) => {
     tasksController.createTask(io, socket, data);
+  });
+  socket.on(SocketEventEnum.boardsUpdate, (data) => {
+    boardsController.updateBoard(io, socket, data);
+  });
+  socket.on(SocketEventEnum.boardsDelete, (data) => {
+    boardsController.deleteBoard(io, socket, data);
+  });
+  socket.on(SocketEventEnum.columnsDelete, (data) => {
+    columnsController.deleteColumn(io, socket, data);
+  });
+  socket.on(SocketEventEnum.columnsUpdate, (data) => {
+    columnsController.updateColumn(io, socket, data);
+  });
+  socket.on(SocketEventEnum.tasksUpdate, (data) => {
+    tasksController.updateTask(io, socket, data);
+  });
+  socket.on(SocketEventEnum.tasksDelete, (data) => {
+    tasksController.deleteTask(io, socket, data);
   });
 });
 

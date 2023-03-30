@@ -55,7 +55,7 @@ export const createTask = async (
     console.log('create task arrived', data);
     if (!socket.user) {
       console.log('user untothorized');
-      socket.emit(SocketEventEnum.taskCreateFailure, 'User is not authorized');
+      socket.emit(SocketEventEnum.tasksCreateFailure, 'User is not authorized');
       return;
     }
     const newTask = new TaskModel({
@@ -66,11 +66,60 @@ export const createTask = async (
       description: data.description
     });
     const savedTask = await newTask.save();
-    io.to(data.boardId).emit(SocketEventEnum.taskCreateSucess, savedTask);
+    io.to(data.boardId).emit(SocketEventEnum.tasksCreateSucess, savedTask);
   } catch (err) {
-    socket.emit(SocketEventEnum.columnCreateFailure, getErrorMessage(err));
+    socket.emit(SocketEventEnum.columnsCreateFailure, getErrorMessage(err));
     console.log(err);
   }
 };
 
+export const updateTask = async (
+  io: Server,
+  socket: SocketExtended,
+  data: {
+    boardId: string;
+    taskId: string;
+    fields: { title?: string; description?: string; columnId?: string };
+  }
+) => {
+  try {
+    if (!socket.user) {
+      socket.emit(
+        SocketEventEnum.tasksUpdateFailure,
+        getErrorMessage('User is not authorized')
+      );
+      return;
+    }
+    const updatedTask = await TaskModel.findByIdAndUpdate(
+      data.taskId,
+      data.fields,
+      { new: true }
+    );
+    io.to(data.boardId).emit(SocketEventEnum.tasksUpdateSucess, updatedTask);
+  } catch (err) {
+    console.log(err);
+    socket.emit(SocketEventEnum.tasksUpdateFailure, getErrorMessage(err));
+  }
+};
+
+export const deleteTask = async (
+  io: Server,
+  socket: SocketExtended,
+  data: { boardId: string; taskId: string }
+) => {
+  try {
+    if (!socket.user) {
+      socket.emit(
+        SocketEventEnum.tasksDeleteFailure,
+        getErrorMessage('User is not authorized')
+      );
+      return;
+    }
+    await TaskModel.deleteOne({ _id: data.taskId });
+    io.to(data.boardId).emit(SocketEventEnum.tasksDeleteSucess, data.taskId);
+  } catch (err) {
+    console.log(err);
+    socket.emit(SocketEventEnum.tasksDeleteFailure, getErrorMessage(err));
+  }
+};
 // db.tasks.insert({title: "First Task",description: 'The best Task', userId: ObjectId("641c3d993dbf12ebea1b8a0d"), boardId: ObjectId("641cee3219a42d1e454ee1de"), columnId: ObjectId("641ed020dd29d12b550fbd05")})

@@ -1,16 +1,24 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BoardComponent } from './board.component';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from '../auth/services/auth.guard';
 import { NavbarModule } from '../shared/modules/navbar/navbar.module';
 import { InlineFormModule } from '../shared/modules/inlineForm/inline-form.module';
+import { BoardComponent } from './components/board/board.component';
+import { TaskModalComponent } from './components/task-modal/task-modal.component';
+import { ReactiveFormsModule } from '@angular/forms';
 
 const routes: Routes = [
   {
     path: 'boards/:boardId',
     component: BoardComponent,
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard],
+    children: [
+      {
+        path: 'tasks/:taskId',
+        component: TaskModalComponent
+      }
+    ]
   }
 ];
 
@@ -19,8 +27,9 @@ const routes: Routes = [
     CommonModule,
     RouterModule.forChild(routes),
     NavbarModule,
-    InlineFormModule
+    InlineFormModule,
+    ReactiveFormsModule
   ],
-  declarations: [BoardComponent]
+  declarations: [BoardComponent, TaskModalComponent]
 })
 export class BoardModule {}

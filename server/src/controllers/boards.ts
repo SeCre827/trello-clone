@@ -1,8 +1,10 @@
 import { NextFunction, Response } from 'express';
 import { Server } from 'socket.io';
+import { getErrorMessage } from '../helpers';
 import BoardModel from '../models/board';
 import { ExpressRequestInterface } from '../types/expressRequest.interface';
 import { SocketExtended } from '../types/socket.interface';
+import { SocketEventEnum } from '../types/socketEvents.enum';
 
 export const getBoards = async (
   req: ExpressRequestInterface,
@@ -75,6 +77,52 @@ export const leaveBoard = (
   // removes this user (identified from the socket object) to the room with id = data.boardId
   console.log('server socket io leave', socket.user);
   socket.leave(data.boardId);
+};
+
+export const updateBoard = async (
+  io: Server,
+  socket: SocketExtended,
+  data: { boardId: string; fields: { title: string } }
+) => {
+  try {
+    if (!socket.user) {
+      socket.emit(
+        SocketEventEnum.boardsUpdateFailure,
+        getErrorMessage('User is not authorized')
+      );
+      return;
+    }
+    const updatedBoard = await BoardModel.findByIdAndUpdate(
+      data.boardId,
+      data.fields,
+      { new: true }
+    );
+    io.to(data.boardId).emit(SocketEventEnum.boardsUpdateSucess, updatedBoard);
+  } catch (err) {
+    console.log(err);
+    socket.emit(SocketEventEnum.boardsUpdateFailure, getErrorMessage(err));
+  }
+};
+
+export const deleteBoard = async (
+  io: Server,
+  socket: SocketExtended,
+  data: { boardId: string }
+) => {
+  try {
+    if (!socket.user) {
+      socket.emit(
+        SocketEventEnum.boardsUpdateFailure,
+        getErrorMessage('User is not authorized')
+      );
+      return;
+    }
+    await BoardModel.deleteOne({ _id: data.boardId });
+    io.to(data.boardId).emit(SocketEventEnum.boardsDeleteSucess);
+  } catch (err) {
+    console.log(err);
+    socket.emit(SocketEventEnum.boardsUpdateFailure, getErrorMessage(err));
+  }
 };
 
 // db.boards.insert({title: "First Board", userId: ObjectId("641c3d993dbf12ebea1b8a0d")})

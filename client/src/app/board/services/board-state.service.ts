@@ -30,6 +30,10 @@ export class BoardStateService {
     this.socketService.emit(SocketEventEnum.boardsLeave, { boardId });
   }
 
+  updateBoard(updatedBoard: IBoard) {
+    this.board$.next(updatedBoard);
+  }
+
   addColumn(column: IColumn): void {
     let updatedColumns: IColumn[] = [...this.columns$.getValue(), column];
     this.setColumns(updatedColumns);
@@ -39,5 +43,44 @@ export class BoardStateService {
     let updatedTasks: ITask[] = [...this.tasks$.getValue(), task];
     this.setTasks(updatedTasks);
     console.log('updated tasks :', this.tasks$.getValue());
+  }
+
+  updateColumn(updatedColumn: IColumn): void {
+    let updatedColumns: IColumn[] = this.columns$.getValue().map((column) => {
+      if (column.id === updatedColumn.id) {
+        return { ...column, title: updatedColumn.title };
+      }
+      return column;
+    });
+    this.setColumns(updatedColumns);
+  }
+
+  updateTask(updatedTask: ITask): void {
+    let updatedTasks: ITask[] = this.tasks$.getValue().map((task) => {
+      if (task.id === updatedTask.id) {
+        return {
+          ...task,
+          title: updatedTask.title,
+          description: updatedTask.description,
+          columnId: updatedTask.columnId
+        };
+      }
+      return task;
+    });
+    this.setTasks(updatedTasks);
+  }
+
+  deleteColumn(columnId: string): void {
+    let updatedColumns: IColumn[] = this.columns$
+      .getValue()
+      .filter((column) => column.id !== columnId);
+    this.setColumns(updatedColumns);
+  }
+
+  deleteTask(taskId: string): void {
+    let updatedTasks: ITask[] = this.tasks$
+      .getValue()
+      .filter((task) => task.id !== taskId);
+    this.setTasks(updatedTasks);
   }
 }
